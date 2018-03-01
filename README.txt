@@ -1,3 +1,3 @@
-A Pen created at CodePen.io. You can find this one at https://codepen.io/yawkwarteng/pen/fABbj.
+A Pen created at CodePen.io. You can find this one at https://codepen.io/AdventureBear/pen/yyXXQZ.
 
- Classic snake game! Press SPACE to start or restart the game. Use arrows to move. Press Esc to quit. Inspired by: Karapuzz.
+ http://thecodeplayer.com/walkthrough/html5-game-tutorial-make-a-snake-game-using-html5-canvas-jquery
