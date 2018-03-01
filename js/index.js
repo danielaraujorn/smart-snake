@@ -25,7 +25,7 @@ $(document).ready(function() {
     //Lets move the snake now using a timer which will trigger the paint function
     //every 60ms
     if (typeof game_loop != "undefined") clearInterval(game_loop);
-    game_loop = setInterval(paint, 10);
+    game_loop = setInterval(paint, 15);
   }
   init();
 
@@ -37,7 +37,21 @@ $(document).ready(function() {
       snake_array.push({ x: i, y: 0 });
     }
   }
+  function inside(point, vs) {
+    // ray-casting algorithm based on
+    // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+    var inside = false;
+    for (var i = 1, j = vs.length - 1; i < vs.length; j = i++) {
+      var intersect =
+        vs[i].y > point.y != vs[j].y > point.y &&
+        point.x <
+          (vs[j].x - vs[i].x) * (point.y - vs[i].y) / (vs[j].y - vs[i].y) +
+            vs[i].x;
+      if (intersect) inside = !inside;
+    }
 
+    return inside;
+  }
   //Lets create the food now
   function create_food() {
     food = {
@@ -47,48 +61,70 @@ $(document).ready(function() {
     //This will create a cell with x/y between 0-44
     //Because there are 45(450/10) positions accross the rows and columns
   }
-  function decisaoFinal(nx, ny) {
+  function decisaoFinal(nx, ny, last) {
     if (
+      (last !== "up",
       checkColision(nx - 1, ny, snake_array) &&
-      !checkColision(nx, ny - 1, snake_array)
+        !checkColision(nx, ny - 1, snake_array) &&
+        !inside({ x: nx, y: ny - 1 }, snake_array))
     ) {
       d = "up";
-      console.log("up");
     } else if (
+      (last !== "right",
       checkColision(nx, ny - 1, snake_array) &&
-      !checkColision(nx + 1, ny, snake_array)
+        !checkColision(nx + 1, ny, snake_array) &&
+        !inside({ x: nx + 1, y: ny }, snake_array))
     ) {
-      console.log("right");
       d = "right";
     } else if (
+      (last !== "down",
       checkColision(nx + 1, ny, snake_array) &&
-      !checkColision(nx, ny + 1, snake_array)
+        !checkColision(nx, ny + 1, snake_array) &&
+        !inside({ x: nx, y: ny + 1 }, snake_array))
     ) {
       d = "down";
-      console.log("down");
-    } else if (!checkColision(nx - 1, ny, snake_array)) {
+    } else if (
+      (last !== "left",
+      !checkColision(nx - 1, ny, snake_array) &&
+        !inside({ x: nx - 1, y: ny }, snake_array))
+    ) {
       d = "left";
-      console.log("left");
     }
   }
-  function verifyCloserWay(nx, ny) {
+  function verifyCloserWay(nx, ny, lastHorizontal) {
     if (
       Math.abs(snake_array[0].x - food.x) >= Math.abs(snake_array[0].y - food.y)
     ) {
       if (snake_array[0].x - food.x >= 0) {
-        if (!checkColision(nx - 1, ny, snake_array)) d = "left";
-        else decisaoFinal(nx, ny);
+        if (
+          !checkColision(nx - 1, ny, snake_array) &&
+          !inside({ x: nx - 1, y: ny }, snake_array)
+        )
+          d = "left";
+        else decisaoFinal(nx, ny, "left");
       } else {
-        if (!checkColision(nx + 1, ny, snake_array)) d = "right";
-        else decisaoFinal(nx, ny);
+        if (
+          !checkColision(nx + 1, ny, snake_array) &&
+          !inside({ x: nx + 1, y: ny }, snake_array)
+        )
+          d = "right";
+        else decisaoFinal(nx, ny, "right");
       }
     } else {
       if (snake_array[0].y - food.y >= 0) {
-        if (!checkColision(nx, ny - 1, snake_array)) d = "up";
-        else decisaoFinal(nx, ny);
+        if (
+          !checkColision(nx, ny - 1, snake_array) &&
+          !inside({ x: nx, y: ny - 1 }, snake_array)
+        )
+          d = "up";
+        else decisaoFinal(nx, ny, "up");
       } else {
-        if (!checkColision(nx, ny + 1, snake_array)) d = "down";
-        else decisaoFinal(nx, ny);
+        if (
+          !checkColision(nx, ny + 1, snake_array) &&
+          !inside({ x: nx, y: ny + 1 }, snake_array)
+        )
+          d = "down";
+        else decisaoFinal(nx, ny, "down");
       }
     }
   }
@@ -121,6 +157,7 @@ $(document).ready(function() {
     //Lets add the code for body collision
     //Now if the head of the snake bumps into its body, the game will restart
     if (checkColision(nx, ny, snake_array)) {
+      console.log("ta dentro?", inside({ x: nx, y: ny }, snake_array));
       init();
       //Lets organize the code a bit now.
       return;
